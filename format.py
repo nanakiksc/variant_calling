@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 #-*- coding:utf-8 -*-
 
-# Hard filtering rules.
-MIN_COV = 8
-MIN_ALT = 7
-
 import sys
 
 print '\t'.join(['dbSNP', 'Locus', 'Type', 'Transcripts', 'Ref', 'Alt', 'Reads1', 'Reads2', 'VarFreq'])
@@ -25,11 +21,7 @@ with open(sys.argv[1]) as fin:
         ref = sline[6]
         alt = sline[7]
         format_field = sline[17].split(':')
-        read1, read2 = format_field[1].split(',')
-        depth = format_field[2]
-        assert int(read1) + int(read2) == int(depth)
-#        if int(depth) < MIN_COV or int(read2) < MIN_ALT:
-#            continue
-        varfreq = str(round(float(read2) / float(depth) * 100, 2)).replace('.', ',') + '%'
+        read1, read2 = format_field[4:6]
+        varfreq = format_field[6]
 
         print '\t'.join([dbsnp, locus, var_type, transcript, ref, alt, read1, read2, varfreq])

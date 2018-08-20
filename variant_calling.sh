@@ -9,7 +9,7 @@ BUILD=hg19
 DATAD=${HOME}/data/${BUILD}
 FASTA=${DATAD}/masked/${BUILD}.karyosorted.fa
 BWAIX=${DATAD}/masked/bwa/${BUILD}.masked
-DBSNP=${DATAD}/dbsnp/All_20180423_chr.vcf.gz # chrsorted
+DBSNP=${DATAD}/dbsnp/All_20180423_chr.vcf.gz # chr
 MILLS=${DATAD}/gatk_resources/Mills_and_1000G_gold_standard.indels.hg19.sites.vcf.gz
 PHASE=${DATAD}/gatk_resources/1000G_phase1.indels.hg19.sites.vcf.gz
 CPTUR=${HOME}/avivancos/plasma_umis/capture_regions/171106_HG19_VHIO_UMIs_EZ_HX3_capture_targets.bed
@@ -23,12 +23,12 @@ ANNDB=${HOME}/utils/annovar/humandb/
 
 #if [ $? -ne 0 ]; then exit $?; fi
 
-#gatk MarkDuplicatesWithMateCigar \
-#    --INPUT ${SM}.raw.bam \
-#    --METRICS_FILE ${SM}.metrics.txt \
-#    --OUTPUT ${SM}.dedup.bam
+gatk MarkDuplicatesWithMateCigar \
+    --INPUT ${SM}.raw.bam \
+    --METRICS_FILE ${SM}.metrics.txt \
+    --OUTPUT ${SM}.dedup.bam
 
-#if [ $? -ne 0 ]; then exit $?; fi
+if [ $? -ne 0 ]; then exit $?; fi
 #rm ${SM}.raw.bam
 
 gatk ReorderSam \
@@ -37,7 +37,7 @@ gatk ReorderSam \
     --REFERENCE ${FASTA}
 
 if [ $? -ne 0 ]; then exit $?; fi
-#rm ${SM}.dedup.bam
+rm ${SM}.dedup.bam
 
 samtools index ${SM}.reorder.bam
 
@@ -68,7 +68,7 @@ java -jar ${HOME}/utils/GenomeAnalysisTK-3.8-1-0-gf15c1c3ef/GenomeAnalysisTK.jar
     --filter_bases_not_stored
 
 if [ $? -ne 0 ]; then exit $?; fi
-#rm ${SM}.reorder.bam ${SM}.reorder.bai ${SM}.intervals
+rm ${SM}.reorder.bam ${SM}.reorder.bai ${SM}.intervals
 
 gatk BaseRecalibrator \
     --input ${SM}.realign.bam \
@@ -86,17 +86,36 @@ gatk ApplyBQSR \
     --output ${SM}.recal.bam
 
 if [ $? -ne 0 ]; then exit $?; fi
-#rm ${SM}.realign.bam ${SM}.recal.table
+rm ${SM}.realign.bam ${SM}.recal.table
 
-gatk HaplotypeCaller \
-    --input ${SM}.recal.bam \
-    --output ${SM}.vcf \
-    --reference ${FASTA} \
-    --dbsnp ${DBSNP} \
-    --standard-min-confidence-threshold-for-calling ${VQUAL} \
-    --intervals ${CPTUR}
+#gatk HaplotypeCaller \
+#    --input ${SM}.recal.bam \
+#    --output ${SM}.vcf \
+#    --reference ${FASTA} \
+#    --dbsnp ${DBSNP} \
+#    --intervals ${CPTUR} \
+#    --standard-min-confidence-threshold-for-calling ${VQUAL} \
+#    --dont-use-soft-clipped-bases true
+
+samtools mpileup -AB \
+    -f ${FASTA} \
+    -o ${SM}.mpileup \
+    ${SM}.recal.bam
+
+if [ $? -ne 0  ]; then exit $?; fi
+#rm ${SM}.recal.bam
+
+java -jar ${HOME}/utils/varscan/VarScan.v2.4.3.jar \
+    mpileup2cns ${SM}.mpileup \
+    --min-reads2 7 \
+    --min-var-freq 0.05 \
+    --p-value 0.05 \
+    --output-vcf 1 \
+    --variants \
+    > ${SM}.vcf
 
 if [ $? -ne 0 ]; then exit $?; fi
+rm ${SM}.mpileup
 
 ${HOME}/utils/annovar/convert2annovar.pl \
     --format vcf4 \
@@ -105,7 +124,7 @@ ${HOME}/utils/annovar/convert2annovar.pl \
     ${SM}.vcf
 
 if [ $? -ne 0 ]; then exit $?; fi
-#rm ${SM}.vcf
+rm ${SM}.vcf
 
 ${HOME}/utils/annovar/annotate_variation.pl \
     --outfile ${SM} \
@@ -115,10 +134,10 @@ ${HOME}/utils/annovar/annotate_variation.pl \
     ${ANNDB}
 
 if [ $? -ne 0 ]; then exit $?; fi
-#rm ${SM}.ann
+rm ${SM}.ann
 
 ${HOME}/src/Pipelines/variant_calling/format.py ${SM}.exonic_variant_function > ${SM}.xls
 
 if [ $? -ne 0 ]; then exit $?; fi
-#rm ${SM}.*variant_function ${SM}.log
+rm ${SM}.*variant_function ${SM}.log
 exit 0

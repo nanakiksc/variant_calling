@@ -88,7 +88,8 @@ ANNDB=${HOME}/utils/annovar/humandb/
 gatk MarkDuplicatesWithMateCigar \
     --INPUT ${SM}.raw.bam \
     --METRICS_FILE ${SM}.metrics.txt \
-    --OUTPUT ${SM}.dedup.bam
+    --OUTPUT ${SM}.dedup.bam \
+    --REMOVE_DUPLICATES true
 
 ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
 #rm ${SM}.raw.bam

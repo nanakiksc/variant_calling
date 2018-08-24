@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-#I1=$1
-#I2=$2
-SM=$1
+I1=$1
+I2=$2
+SM=$3
 
 HOME=/home/pcusco
 BWANC=4
@@ -17,73 +17,74 @@ PHASE=${DATAD}/gatk_resources/1000G_phase1.indels.hg19.sites.vcf.gz
 CPTUR=${HOME}/avivancos/plasma_umis/capture_regions/171106_HG19_VHIO_UMIs_EZ_HX3_capture_targets.bed
 ANNDB=${HOME}/utils/annovar/humandb/
 
-#fastq_quality_filter -q 30 -p 75 \
-#    -i <(zcat ${I1}) \
-#    -o ${SM}_filtered_R1.fastq
-#
-#ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
-#
-#fastq_quality_filter -q 30 -p 75 \
-#    -i <(zcat ${I2}) \
-#    -o ${SM}_filtered_R2.fastq
-#
-#ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
-#
-#${HOME}/utils/Homer/bin/homerTools trim \
-#    -5 TGACT \
-#    -minMatchLength 5 \
-#    -min 55 \
-#    ${SM}_filtered_R1.fastq \
-#    ${SM}_filtered_R2.fastq
-#
-#ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
-#rm ${SM}_filtered_R*.fastq *.lengths
-#
-#${HOME}/utils/Homer/bin/homerTools trim \
-#    -3 AGATCGGAAGAGCACACGTCT \
-#    -mis 2 \
-#    -minMatchLength 4 \
-#    -min 55 \
-#    ${SM}_filtered_R1.fastq.trimmed \
-#    ${SM}_filtered_R2.fastq.trimmed
-#
-#ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
-#rm ${SM}_filtered_R*.fastq.trimmed *.lengths
-#
-#${HOME}/utils/pairfq/Pairfq-0.17.0/bin/pairfq addinfo \
-#    -i ${SM}_filtered_R1.fastq.trimmed.trimmed \
-#    -o ${SM}_info_R1.fastq \
-#    -p 1
-#
-#ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
-#rm ${SM}_filtered_R1.fastq.trimmed.trimmed
-#
-#${HOME}/utils/pairfq/Pairfq-0.17.0/bin/pairfq addinfo \
-#    -i ${SM}_filtered_R2.fastq.trimmed.trimmed \
-#    -o ${SM}_info_R2.fastq \
-#    -p 2
-#
-#ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
-#rm ${SM}_filtered_R2.fastq.trimmed.trimmed
-#
-#${HOME}/utils/pairfq/Pairfq-0.14.3/bin/pairfq makepairs \
-#    -f ${SM}_info_R1.fastq \
-#    -r ${SM}_info_R2.fastq \
-#    -fp ${SM}_sync_R1.fastq \
-#    -rp ${SM}_sync_R2.fastq \
-#    -fs ${SM}_unpaired_R1.fastq \
-#    -rs ${SM}_unpaired_R2.fastq
-#
-#ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
-#rm ${SM}_info_R*.fastq ${SM}_unpaired_R*.fastq
+fastq_quality_filter -q 30 -p 75 \
+    -i <(zcat ${I1}) \
+    -o ${SM}_R1.filtered.fastq
 
-#bwa mem -t ${BWANC} -M -R '@RG\tID:1\tLB:1\tPL:illumina\tSM:'${SM}'\tPU:1.1.1' \
-#    ${BWAIX} \
-#    <(zcat ${SM}_sync_R1.fastq.gz) \
-#    <(zcat ${SM}_sync_R2.fastq.gz) | \
-#    samtools sort -o ${SM}.raw.bam
+ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
 
-#ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
+fastq_quality_filter -q 30 -p 75 \
+    -i <(zcat ${I2}) \
+    -o ${SM}_R2.filtered.fastq
+
+ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
+
+${HOME}/utils/Homer/bin/homerTools trim \
+    -5 TGACT \
+    -minMatchLength 5 \
+    -min 55 \
+    ${SM}_R1.filtered.fastq \
+    ${SM}_R2.filtered.fastq
+
+ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
+rm ${SM}_R*.filtered.fastq *.lengths
+
+${HOME}/utils/Homer/bin/homerTools trim \
+    -3 AGATCGGAAGAGCACACGTCT \
+    -mis 2 \
+    -minMatchLength 4 \
+    -min 55 \
+    ${SM}_R1.filtered.fastq.trimmed \
+    ${SM}_R2.filtered.fastq.trimmed
+
+ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
+rm ${SM}_R*.filtered.fastq.trimmed *.lengths
+
+${HOME}/utils/pairfq/Pairfq-0.17.0/bin/pairfq addinfo \
+    -i ${SM}_R1.filtered.fastq.trimmed.trimmed \
+    -o ${SM}_R1.info.fastq \
+    -p 1
+
+ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
+rm ${SM}_R1.filtered.fastq.trimmed.trimmed
+
+${HOME}/utils/pairfq/Pairfq-0.17.0/bin/pairfq addinfo \
+    -i ${SM}_R2.filtered.fastq.trimmed.trimmed \
+    -o ${SM}_R2.info.fastq \
+    -p 2
+
+ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
+rm ${SM}_R2.filtered.fastq.trimmed.trimmed
+
+${HOME}/utils/pairfq/Pairfq-0.14.3/bin/pairfq makepairs \
+    -f ${SM}_R1.info.fastq \
+    -r ${SM}_R2.info.fastq \
+    -fp ${SM}_R1.sync.fastq \
+    -rp ${SM}_R2.sync.fastq \
+    -fs ${SM}_R1.unpaired.fastq \
+    -rs ${SM}_R2.unpaired.fastq
+
+ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
+rm ${SM}_R*.info.fastq ${SM}_R*.unpaired.fastq
+
+bwa mem -t ${BWANC} -M -R '@RG\tID:1\tLB:1\tPL:illumina\tSM:'${SM}'\tPU:1.1.1' \
+    ${BWAIX} \
+    ${SM}_R1.sync.fastq \
+    ${SM}_R2.sync.fastq | \
+    samtools sort -o ${SM}.raw.bam
+
+ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
+rm ${SM}_R*.sync.fastq
 
 gatk MarkDuplicatesWithMateCigar \
     --INPUT ${SM}.raw.bam \
@@ -92,7 +93,7 @@ gatk MarkDuplicatesWithMateCigar \
     --REMOVE_DUPLICATES true
 
 ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
-#rm ${SM}.raw.bam
+rm ${SM}.raw.bam
 
 gatk ReorderSam \
     --INPUT ${SM}.dedup.bam \
@@ -131,7 +132,7 @@ java -jar ${HOME}/utils/gatk/GenomeAnalysisTK-3.8-1-0-gf15c1c3ef/GenomeAnalysisT
     --filter_bases_not_stored
 
 ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
-rm ${SM}.reorder.bam ${SM}.reorder.bai ${SM}.intervals
+rm ${SM}.reorder.bam* ${SM}.intervals
 
 gatk BaseRecalibrator \
     --input ${SM}.realign.bam \
@@ -149,7 +150,7 @@ gatk ApplyBQSR \
     --output ${SM}.recal.bam
 
 ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
-rm ${SM}.realign.bam ${SM}.recal.table
+rm ${SM}.realign.ba* ${SM}.recal.table
 
 samtools mpileup -AB \
     -f ${FASTA} \

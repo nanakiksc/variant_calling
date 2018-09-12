@@ -5,7 +5,7 @@ I2=$2
 SM=$3
 
 HOME=/home/pcusco
-BWANC=4
+BWANC=8
 VQUAL=30
 BUILD=hg19
 DATAD=${HOME}/data/${BUILD}
@@ -37,7 +37,7 @@ ${HOME}/utils/Homer/bin/homerTools trim \
     ${SM}_R2.filtered.fastq
 
 ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
-rm ${SM}_R*.filtered.fastq *.lengths
+rm ${SM}_R*.filtered.fastq ${SM}_R*.filtered.fastq.lengths
 
 ${HOME}/utils/Homer/bin/homerTools trim \
     -3 AGATCGGAAGAGCACACGTCT \
@@ -48,7 +48,7 @@ ${HOME}/utils/Homer/bin/homerTools trim \
     ${SM}_R2.filtered.fastq.trimmed
 
 ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
-rm ${SM}_R*.filtered.fastq.trimmed *.lengths
+rm ${SM}_R*.filtered.fastq.trimmed ${SM}_R*.filtered.fastq.trimmed.lengths
 
 ${HOME}/utils/pairfq/Pairfq-0.17.0/bin/pairfq addinfo \
     -i ${SM}_R1.filtered.fastq.trimmed.trimmed \
@@ -77,14 +77,32 @@ ${HOME}/utils/pairfq/Pairfq-0.14.3/bin/pairfq makepairs \
 ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
 rm ${SM}_R*.info.fastq ${SM}_R*.unpaired.fastq
 
-bwa mem -t ${BWANC} -M -R '@RG\tID:1\tLB:1\tPL:illumina\tSM:'${SM}'\tPU:1.1.1' \
+bwa aln -n 4 -t ${BWANC} -e 25 \
     ${BWAIX} \
     ${SM}_R1.sync.fastq \
+    > ${SM}_R1.sai
+
+ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
+
+bwa aln -n 4 -t ${BWANC} -e 25 \
+    ${BWAIX} \
+    ${SM}_R2.sync.fastq \
+    > ${SM}_R2.sai
+
+ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
+
+bwa sampe -s -a 400 -o 10000 \
+    -r '@RG\tID:RG1\tLB:DuplexSeq\tPL:illumina\tSM:'${SM}'\tPU:1.1.1' \
+    ${BWAIX} \
+    ${SM}_R1.sai \
+    ${SM}_R2.sai \
+    ${SM}_R1.sync.fastq \
     ${SM}_R2.sync.fastq | \
+    samtools view -F 4 -q 1 -b | \
     samtools sort -o ${SM}.raw.bam
 
 ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
-rm ${SM}_R*.sync.fastq
+rm ${SM}_R*.sync.fastq ${SM}_R*.sai
 
 gatk MarkDuplicatesWithMateCigar \
     --INPUT ${SM}.raw.bam \
@@ -93,7 +111,7 @@ gatk MarkDuplicatesWithMateCigar \
     --REMOVE_DUPLICATES true
 
 ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
-rm ${SM}.raw.bam
+rm ${SM}.raw.bam ${SM}.metrics.txt
 
 gatk ReorderSam \
     --INPUT ${SM}.dedup.bam \
@@ -170,16 +188,35 @@ java -jar ${HOME}/utils/varscan/VarScan-2.4.x/VarScan.v2.4.3.jar \
     > ${SM}.vcf
 
 ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
-rm ${SM}.mpileup
+gzip ${SM}.mpileup
+#rm ${SM}.mpileup
+
+bgzip ${SM}.vcf
+
+ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
+
+tabix ${SM}.vcf.gz
+
+ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
+
+gatk VariantAnnotator \
+    --output ${SM}.dbsnp.vcf \
+    --variant ${SM}.vcf.gz \
+    --dbsnp ${DBSNP} \
+    --intervals ${CPTUR} \
+    --reference ${FASTA}
+
+ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
+rm ${SM}.vcf.gz*
 
 ${HOME}/utils/annovar/convert2annovar.pl \
     --format vcf4 \
     --includeinfo \
     --outfile ${SM}.ann \
-    ${SM}.vcf
+    ${SM}.dbsnp.vcf
 
 ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
-rm ${SM}.vcf
+rm ${SM}.dbsnp.vcf
 
 ${HOME}/utils/annovar/annotate_variation.pl \
     --outfile ${SM} \

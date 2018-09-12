@@ -21,7 +21,8 @@ with open(sys.argv[1]) as fin:
         ref = sline[6]
         alt = sline[7]
         format_field = sline[17].split(':')
-        read1, read2 = format_field[4:6]
+        read1 = format_field[10]
+        read2 = format_field[2]
         varfreq = format_field[6]
 
         print '\t'.join([dbsnp, locus, var_type, transcript, ref, alt, read1, read2, varfreq])

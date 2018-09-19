@@ -5,7 +5,10 @@ import sys
 
 print '\t'.join(['dbSNP', 'Locus', 'Type', 'Transcripts', 'Ref', 'Alt', 'Reads1', 'Reads2', 'VarFreq'])
 
-with open(sys.argv[1]) as fin:
+exonic_variant_function = sys.argv[1] + '.exonic_variant_function'
+variant_function = sys.argv[1] + '.variant_function'
+
+with open(exonic_variant_function) as fin:
     for line in fin:
         sline = line.split('\t')
 
@@ -26,3 +29,25 @@ with open(sys.argv[1]) as fin:
         varfreq = format_field[6]
 
         print '\t'.join([dbsnp, locus, var_type, transcript, ref, alt, read1, read2, varfreq])
+
+with open(variant_function) as fin:
+    for line in fin:
+        sline = line.split('\t')
+
+        var_type = sline[0]
+        if var_type == 'splicing':
+            dbsnp = sline[9] if sline[9] != '.' else ''
+            chrom = sline[2].lstrip('chr')
+            start = sline[3]
+            end = sline[4]
+            locus = '%s:%s-%s' % (chrom, start, end)
+            transcript = sline[1].rstrip(',')
+            ref = sline[5]
+            alt = sline[6]
+            format_field = sline[16].split(':')
+            read1 = format_field[10]
+            read2 = format_field[2]
+            varfreq = format_field[6]
+
+            print '\t'.join([dbsnp, locus, var_type, transcript, ref, alt, read1, read2, varfreq])
+

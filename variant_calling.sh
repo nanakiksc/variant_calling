@@ -77,21 +77,21 @@ ${HOME}/utils/pairfq/Pairfq-0.14.3/bin/pairfq makepairs \
 ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
 rm ${SM}_R*.info.fastq ${SM}_R*.unpaired.fastq
 
-bwa aln -n 4 -t ${BWANC} -e 25 \
+bwa aln -t ${BWANC} \
     ${BWAIX} \
     ${SM}_R1.sync.fastq \
     > ${SM}_R1.sai
 
 ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
 
-bwa aln -n 4 -t ${BWANC} -e 25 \
+bwa aln -t ${BWANC} \
     ${BWAIX} \
     ${SM}_R2.sync.fastq \
     > ${SM}_R2.sai
 
 ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
 
-bwa sampe -s -a 400 -o 10000 \
+bwa sampe \
     -r '@RG\tID:RG1\tLB:DuplexSeq\tPL:illumina\tSM:'${SM}'\tPU:1.1.1' \
     ${BWAIX} \
     ${SM}_R1.sai \
@@ -170,7 +170,7 @@ gatk ApplyBQSR \
 ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
 rm ${SM}.realign.ba* ${SM}.recal.table
 
-samtools mpileup -AB \
+samtools mpileup -B \
     -f ${FASTA} \
     -o ${SM}.mpileup \
     ${SM}.recal.bam
@@ -181,17 +181,18 @@ ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
 java -jar ${HOME}/utils/varscan/VarScan-2.4.x/VarScan.v2.4.3.jar \
     mpileup2cns ${SM}.mpileup \
     --min-reads2 7 \
+    --min-avg-qual 15 \
     --min-var-freq 0.0 \
     --p-value 0.05 \
+    --strand-filter 1 \
     --output-vcf 1 \
     --variants \
     > ${SM}.vcf
 
 ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
-gzip ${SM}.mpileup
-#rm ${SM}.mpileup
+rm ${SM}.mpileup
 
-bgzip ${SM}.vcf
+bgzip -f ${SM}.vcf
 
 ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
 
@@ -216,7 +217,7 @@ ${HOME}/utils/annovar/convert2annovar.pl \
     ${SM}.dbsnp.vcf
 
 ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
-rm ${SM}.dbsnp.vcf
+rm ${SM}.dbsnp.vcf*
 
 ${HOME}/utils/annovar/annotate_variation.pl \
     --outfile ${SM} \
@@ -228,7 +229,7 @@ ${HOME}/utils/annovar/annotate_variation.pl \
 ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
 rm ${SM}.ann
 
-${HOME}/src/Pipelines/variant_calling/format.py ${SM}.exonic_variant_function > ${SM}.xls
+${HOME}/src/Pipelines/variant_calling/format.py ${SM} > ${SM}.xls
 
 ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
 rm ${SM}.*variant_function ${SM}.log

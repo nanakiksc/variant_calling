@@ -24,4 +24,3 @@ with open(sys.argv[1]) as rs:
 
         if gene_symbol in nm_dict and ref_seq == nm_dict[gene_symbol]:
             print line.rstrip()
-

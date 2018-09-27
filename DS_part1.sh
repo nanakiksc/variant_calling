@@ -8,7 +8,6 @@ HOME=/home/pcusco
 TAGLN=12 # 6
 REPFL=9 # 5
 BUILD=hg19
-DATAD=${HOME}/data/${BUILD}
 
 fastq_quality_filter -q 30 -p 75 \
     -i <(zcat ${I1}) \

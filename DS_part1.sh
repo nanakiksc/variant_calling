@@ -78,3 +78,4 @@ python ${HOME}/src/Python/Duplex-Sequencing/UnifiedConsensusMaker.py \
 
 ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
 rm ${SM}.unmapped.bam
+exit 0

@@ -20,25 +20,15 @@ fastq_quality_filter -q 30 -p 75 \
     -o ${SM}_R2.filtered.fastq
 
 ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
-
-${HOME}/utils/Homer/bin/homerTools trim \
-    -3 AGATCGGAAGAGCACACGTCT \
-    -mis 2 \
-    -minMatchLength 4 \
-    -min 55 \
-    ${SM}_R1.filtered.fastq \
-    ${SM}_R2.filtered.fastq
-
-ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
-rm ${SM}_R*.filtered.fastq ${SM}_R*.filtered.fastq.lengths
+rm ${SM}_R*.filtered.fastq.lengths
 
 ${HOME}/utils/pairfq/Pairfq-0.17.0/bin/pairfq addinfo \
-    -i ${SM}_R1.filtered.fastq.trimmed\
+    -i ${SM}_R1.filtered.fastq \
     -o ${SM}_R1.info.fastq \
     -p 1
 
 ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
-rm ${SM}_R1.filtered.fastq.trimmed
+rm ${SM}_R1.filtered.fastq
 
 ${HOME}/utils/pairfq/Pairfq-0.17.0/bin/pairfq addinfo \
     -i ${SM}_R2.filtered.fastq.trimmed\
@@ -46,7 +36,7 @@ ${HOME}/utils/pairfq/Pairfq-0.17.0/bin/pairfq addinfo \
     -p 2
 
 ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
-rm ${SM}_R2.filtered.fastq.trimmed
+rm ${SM}_R2.filtered.fastq
 
 ${HOME}/utils/pairfq/Pairfq-0.14.3/bin/pairfq makepairs \
     -f ${SM}_R1.info.fastq \
@@ -77,5 +67,5 @@ python ${HOME}/src/Python/Duplex-Sequencing/UnifiedConsensusMaker.py \
     --prefix ${SM}
 
 ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
-rm ${SM}.unmapped.bam
+rm ${SM}.unmapped.bam ${SM}.temp.sort.bam
 exit 0

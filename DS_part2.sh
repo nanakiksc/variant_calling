@@ -145,7 +145,7 @@ ${HOME}/utils/annovar/convert2annovar.pl \
     ${SM}.dbsnp.vcf
 
 ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
-rm ${SM}.dbsnp.vcf
+rm ${SM}.dbsnp.vcf*
 
 ${HOME}/utils/annovar/annotate_variation.pl \
     --outfile ${SM} \
@@ -157,7 +157,7 @@ ${HOME}/utils/annovar/annotate_variation.pl \
 ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
 rm ${SM}.ann
 
-${HOME}/src/Pipelines/variant_calling/format.py ${SM}.exonic_variant_function > ${SM}.xls
+${HOME}/src/Pipelines/variant_calling/format.py ${SM} > ${SM}.xls
 
 ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
 rm ${SM}.*variant_function ${SM}.log

@@ -2,7 +2,7 @@
 
 I1=$1
 I2=$2
-SM=$1
+SM=$3
 
 HOME=/home/pcusco
 BWANC=8

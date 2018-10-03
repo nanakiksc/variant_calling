@@ -20,7 +20,6 @@ fastq_quality_filter -q 30 -p 75 \
     -o ${SM}_R2.filtered.fastq
 
 ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
-rm ${SM}_R*.filtered.fastq.lengths
 
 ${HOME}/utils/pairfq/Pairfq-0.17.0/bin/pairfq addinfo \
     -i ${SM}_R1.filtered.fastq \
@@ -31,7 +30,7 @@ ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
 rm ${SM}_R1.filtered.fastq
 
 ${HOME}/utils/pairfq/Pairfq-0.17.0/bin/pairfq addinfo \
-    -i ${SM}_R2.filtered.fastq.trimmed\
+    -i ${SM}_R2.filtered.fastq \
     -o ${SM}_R2.info.fastq \
     -p 2
 

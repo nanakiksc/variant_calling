@@ -128,12 +128,12 @@ tabix ${SM}.vcf.gz
 
 ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
 
-gatk VariantAnnotator \
+bcftools annotate \
+    --annotations ${DBSNP} \
+    --columns ID \
     --output ${SM}.dbsnp.vcf \
-    --variant ${SM}.vcf.gz \
-    --dbsnp ${DBSNP} \
-    --intervals ${CPTUR} \
-    --reference ${FASTA}
+    --regions-file ${CPTUR} \
+    ${SM}.vcf.gz
 
 ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
 rm ${SM}.vcf.gz*

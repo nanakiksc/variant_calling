@@ -4,6 +4,8 @@ I1=$1
 I2=$2
 SM=$3
 
+SM=Results_UMI/${SM}
+
 HOME=/home/pcusco
 TAGLN=12 # 6
 REPFL=9 # 5

@@ -19,8 +19,8 @@ def parse_variants(line, offset):
     ref = sline[5 + offset]
     alt = sline[6 + offset]
     format_field = sline[16 + offset].split(':')
-    read1 = format_field[10]
-    read2 = format_field[2]
+    read1 = format_field[4]
+    read2 = format_field[5]
     varfreq = format_field[6]
 
     return '\t'.join([dbsnp, locus, var_type, transcript, ref, alt, read1, read2, varfreq])

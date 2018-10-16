@@ -13,7 +13,7 @@ do
     /home/pcusco/utils/FastQC/fastqc ${I1} ${I2} --outdir Results_UMI/FastQC
 
     ./DS_part1.sh ${I1} ${I2} ${SM}
-    ./DS_part2_sscs.sh ${SM}_read1_sscs.fq.gz ${SM}_read2_sscs.fq.gz ${SM}.sscs
+    ./DS_part2_sscs.sh ${SM}_read1_sscs.fq.gz ${SM}_read2_sscs.fq.gz ${SM}.sscs 3
     ./DS_part2_dcs.sh ${SM}_read1_dcs.fq.gz ${SM}_read2_dcs.fq.gz ${SM}.dcs
 done
 

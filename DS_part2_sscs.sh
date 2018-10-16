@@ -6,6 +6,8 @@ SM=$3
 
 SM=Results_UMI/${SM}
 
+MINAD=$4
+
 HOME=/home/pcusco
 BWANC=8
 BUILD=hg19
@@ -112,7 +114,7 @@ ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
 
 java -jar ${HOME}/utils/varscan/VarScan-2.4.x/VarScan.v2.4.3.jar \
     mpileup2cns ${SM}.mpileup \
-    --min-reads2 7 \
+    --min-reads2 ${MINAD} \
     --min-var-freq 0.0 \
     --p-value 0.05 \
     --output-vcf 1 \

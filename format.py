@@ -3,7 +3,7 @@
 
 import sys
 
-print '\t'.join(['dbSNP', 'Locus', 'Type', 'Transcripts', 'Ref', 'Alt', 'Reads1', 'Reads2', 'VarFreq'])
+print '\t'.join(['dbSNP', 'Locus', 'Type', 'Transcripts', 'Ref', 'Alt', 'Reads1', 'Reads2', 'VarFreq', 'Pvalue'])
 
 exonic_variant_function = sys.argv[1] + '.exonic_variant_function'
 variant_function = sys.argv[1] + '.variant_function'
@@ -22,8 +22,9 @@ def parse_variants(line, offset):
     read1 = format_field[4]
     read2 = format_field[5]
     varfreq = format_field[6]
+    pval = format_field[7]
 
-    return '\t'.join([dbsnp, locus, var_type, transcript, ref, alt, read1, read2, varfreq])
+    return '\t'.join([dbsnp, locus, var_type, transcript, ref, alt, read1, read2, varfreq, pval])
 
 
 with open(exonic_variant_function) as fin:

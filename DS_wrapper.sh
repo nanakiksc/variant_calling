@@ -3,12 +3,15 @@
 ID=$1 # Input directory.
 SF=$2 # Samples file (contains sample names).
 
-mkdir -p Results_UMI/FastQC
+OD=Results_UMI
+
+mkdir -p ${OD}/FastQC
 
 for SM in $(cat ${SF})
 do
     I1=${ID}/${SM}_*_R1_001.fastq.gz
     I2=${ID}/${SM}_*_R2_001.fastq.gz
+    SM=${OD}/${SM}
 
     /home/pcusco/utils/FastQC/fastqc ${I1} ${I2} --outdir Results_UMI/FastQC
 

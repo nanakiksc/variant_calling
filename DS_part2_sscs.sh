@@ -110,6 +110,15 @@ samtools mpileup -B \
 ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
 #rm ${SM}.recal.bam
 
+samtools depth -a \
+    -b ${CPTUR} \
+    ${SM}.recal.bam | \
+    awk '{ n += 1; s += $3 } END { printf "%.0f", s / n / 100 }' \
+    > ${SM}.panel_avg_cov.txt
+
+MINCV=$(cat ${SM}.panel_avg_cov.txt)
+MINCV=$(( ${MINCV} > ${MINAD} ? ${MINCV} : ${MINAD} ))
+
 java -jar ${HOME}/utils/varscan/VarScan-2.4.x/VarScan.v2.4.3.jar \
     mpileup2cns ${SM}.mpileup \
     --min-reads2 ${MINAD} \

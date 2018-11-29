@@ -15,13 +15,13 @@ do
 
     /home/pcusco/utils/FastQC/fastqc ${I1} ${I2} --outdir Results_UMI/FastQC
 
-    ./DS_part1_consensus.sh ${I1} ${I2} ${SM}.pre
+    ./DS_part1_consensus.sh ${I1} ${I2} ${SM}
 
-    ./DS_part2_map.sh ${I1}_read1_sscs.fq.gz ${I2}_read2_sscs.fq.gz ${SM}.sscs
-    ./DS_part2_map.sh ${I1}_read1_dcs.fq.gz ${I2}_read2_dcs.fq.gz ${SM}.dcs
+    ./DS_part2_map.sh ${SM}_read1_sscs.fq.gz ${SM}_read2_sscs.fq.gz ${SM}.sscs
+    ./DS_part2_map.sh ${SM}_read1_dcs.fq.gz ${SM}_read2_dcs.fq.gz ${SM}.dcs
 
-    ./DS_part3_sscs.sh ${SM}.sscs 3
-    ./DS_part3_dcs.sh ${SM}.dcs
+    ./DS_part3_sscs_vc.sh ${SM}.sscs 3
+    ./DS_part3_dcs_vc.sh ${SM}.dcs
 
     ./DS_part4_annotate.sh ${SM}.sscs
     ./DS_part4_annotate.sh ${SM}.dcs

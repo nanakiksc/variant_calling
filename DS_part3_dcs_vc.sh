@@ -38,7 +38,7 @@ java -jar ${HOME}/utils/varscan/VarScan-2.4.x/VarScan.v2.4.3.jar \
     --strand-filter 0 \
     --output-vcf 1 \
     --variants | \
-    bgzip > ${SM}.vcf
+    bgzip > ${SM}.vcf.gz
 
 ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
 rm ${SM}.mpileup ${SM}.panel_avg_cov.txt

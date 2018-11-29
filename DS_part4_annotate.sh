@@ -34,7 +34,7 @@ bcftools annotate \
      bgzip > ${SM}.clinvar.vcf.gz
 
 ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
-rm ${SM}.dbsnp.gz*
+rm ${SM}.dbsnp.vcf.gz*
 
 tabix ${SM}.clinvar.vcf.gz
 
@@ -48,7 +48,7 @@ bcftools annotate \
      bgzip > ${SM}.gnomad.vcf.gz
 
 ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
-rm ${SM}.clinvar.gz*
+rm ${SM}.clinvar.vcf.gz*
 
 tabix ${SM}.gnomad.vcf.gz
 
@@ -57,12 +57,12 @@ ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
 bcftools annotate \
      --annotations ${DNSFP} \
      --columns INFO/Polyphen2_HVAR_score,INFO/Polyphen2_HVAR_pred \
-     --output ${SM}.poly.vcf
+     --output ${SM}.poly.vcf \
      --regions-file ${CPTUR} \
      ${SM}.gnomad.vcf.gz
 
 ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
-rm ${SM}.gnomad.gz*
+rm ${SM}.gnomad.vcf.gz*
 
 ${HOME}/utils/annovar/convert2annovar.pl \
     --format vcf4 \
@@ -71,7 +71,7 @@ ${HOME}/utils/annovar/convert2annovar.pl \
     ${SM}.poly.vcf
 
 ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
-rm ${SM}.poly.vcf*
+rm ${SM}.poly.vcf
 
 ${HOME}/utils/annovar/annotate_variation.pl \
     --outfile ${SM} \

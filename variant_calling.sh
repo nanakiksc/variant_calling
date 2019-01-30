@@ -37,28 +37,15 @@ ${HOME}/utils/Homer/bin/homerTools trim \
     ${SM}_R2.filtered.fastq
 
 ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
-#rm ${SM}_R*.filtered.fastq ${SM}_R*.filtered.fastq.lengths
-
-#${HOME}/utils/Homer/bin/homerTools trim \
-#    -3 AGATCGGAAGAGCACACGTCT \
-#    -mis 2 \
-#    -minMatchLength 4 \
-#    -min 55 \
-#    ${SM}_R1.filtered.fastq.trimmed \
-#    ${SM}_R2.filtered.fastq.trimmed
-#
-#ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
-#rm ${SM}_R*.filtered.fastq.trimmed ${SM}_R*.filtered.fastq.trimmed.lengths
-mv ${SM}_R1.filtered.fastq.trimmed ${SM}_R1.filtered.fastq.trimmed.trimmed
-mv ${SM}_R2.filtered.fastq.trimmed ${SM}_R2.filtered.fastq.trimmed.trimmed
+rm ${SM}_R*.filtered.fastq ${SM}_R*.filtered.fastq.lengths
 
 ${HOME}/utils/pairfq/Pairfq-0.17.0/bin/pairfq addinfo \
-    -i ${SM}_R1.filtered.fastq.trimmed.trimmed \
+    -i ${SM}_R1.filtered.fastq.trimmed \
     -o ${SM}_R1.info.fastq \
     -p 1
 
 ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
-#rm ${SM}_R1.filtered.fastq.trimmed.trimmed
+rm ${SM}_R1.filtered.fastq.trimmed
 
 ${HOME}/utils/pairfq/Pairfq-0.17.0/bin/pairfq addinfo \
     -i ${SM}_R2.filtered.fastq.trimmed.trimmed \
@@ -77,7 +64,7 @@ ${HOME}/utils/pairfq/Pairfq-0.14.3/bin/pairfq makepairs \
     -rs ${SM}_R2.unpaired.fastq
 
 ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
-#rm ${SM}_R*.info.fastq ${SM}_R*.unpaired.fastq
+rm ${SM}_R*.info.fastq ${SM}_R*.unpaired.fastq
 
 bwa aln -t ${BWANC} \
     ${BWAIX} \
@@ -101,22 +88,29 @@ bwa sampe \
     ${SM}_R1.sync.fastq \
     ${SM}_R2.sync.fastq | \
     samtools view -F 4 -q 1 -b | \
-    samtools sort -o ${SM}.raw.untrimmed.bam
+    samtools sort -o ${SM}.raw.bam
 
 ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
-#rm ${SM}_R*.sync.fastq ${SM}_R*.sai
-rm ${SM}_R*.sai
+rm ${SM}_R*.sync.fastq ${SM}_R*.sai
 
-#gatk MarkDuplicatesWithMateCigar \
-#    --INPUT ${SM}.raw.bam \
-#    --METRICS_FILE ${SM}.metrics.txt \
-#    --OUTPUT ${SM}.dedup.bam \
+samtools index ${SM}.raw.bam
+
+ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
+
+gatk MarkDuplicatesWithMateCigar \
+    --INPUT ${SM}.raw.bam \
+    --METRICS_FILE ${SM}.metrics.txt \
+    --OUTPUT ${SM}.dedup.bam
 #    --REMOVE_DUPLICATES true
-#
-#ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
-##rm ${SM}.raw.bam ${SM}.metrics.txt
-#rm ${SM}.metrics.txt
-#
+
+ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
+#rm ${SM}.raw.bam ${SM}.metrics.txt
+rm ${SM}.metrics.txt
+
+samtools index ${SM}.dedup.bam
+
+ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
+
 #gatk ReorderSam \
 #    --INPUT ${SM}.dedup.bam \
 #    --OUTPUT ${SM}.reorder.bam \
@@ -239,4 +233,5 @@ rm ${SM}_R*.sai
 #
 #ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
 #rm ${SM}.*variant_function ${SM}.log
-#exit 0
+
+exit 0

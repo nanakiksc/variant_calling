@@ -48,12 +48,12 @@ ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
 rm ${SM}_R1.filtered.fastq.trimmed
 
 ${HOME}/utils/pairfq/Pairfq-0.17.0/bin/pairfq addinfo \
-    -i ${SM}_R2.filtered.fastq.trimmed.trimmed \
+    -i ${SM}_R2.filtered.fastq.trimmed \
     -o ${SM}_R2.info.fastq \
     -p 2
 
 ec=$?; if [ $ec -ne 0 ]; then exit $ec; fi
-#rm ${SM}_R2.filtered.fastq.trimmed.trimmed
+rm ${SM}_R2.filtered.fastq.trimmed
 
 ${HOME}/utils/pairfq/Pairfq-0.14.3/bin/pairfq makepairs \
     -f ${SM}_R1.info.fastq \
